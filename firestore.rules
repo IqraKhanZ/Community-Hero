@@ -1,0 +1,57 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // Users: can read own doc, backend writes via Admin SDK
+    match /users/{userId} {
+      allow read: if request.auth != null && request.auth.uid == userId;
+      allow write: if request.auth != null && request.auth.uid == userId;
+    }
+
+    // Issues: anyone authenticated can read all; owner can update before/after photos
+    match /issues/{issueId} {
+      allow read: if true;
+      allow create: if request.auth != null;
+      allow update: if request.auth != null && (
+        // Owner can update before/after repair URLs
+        request.auth.uid == resource.data.reportedBy ||
+        // Any auth user can upvote or verify
+        request.resource.data.diff(resource.data).affectedKeys().hasOnly(['upvotes', 'verifiedBy', 'afterRepairUrl', 'updatedAt'])
+      );
+      allow delete: if false;
+
+      // Comments subcollection
+      match /comments/{commentId} {
+        allow read: if true;
+        allow create: if request.auth != null;
+        allow update, delete: if request.auth != null && request.auth.uid == resource.data.authorId;
+      }
+    }
+
+    // Predictions: public read, admin write only
+    match /predictions/{predId} {
+      allow read: if true;
+      allow write: if false; // Backend Admin SDK only
+    }
+
+    // Politicians: public read, admin write only
+    match /politicians/{polId} {
+      allow read: if true;
+      allow write: if false; // Backend Admin SDK only
+    }
+
+    // Complaint letters: only the reporter can read their own
+    match /complaintLetters/{letterId} {
+      allow read: if request.auth != null;
+      allow write: if false;
+    }
+
+    // Notifications: user can read/update their own
+    match /notifications/{notifId} {
+      allow read: if request.auth != null && request.auth.uid == resource.data.userId;
+      allow update: if request.auth != null && request.auth.uid == resource.data.userId
+                    && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['read']);
+      allow write: if false;
+    }
+  }
+}
