@@ -3,7 +3,7 @@
 Community Hero is an AI-powered civic management platform that empowers citizens to report local infrastructure issues, tracks politician accountability through dynamic "Shame Scores," predicts infrastructural hotspots before they fail, and uses forensic AI comparison to verify repairs and prevent contractor fraud.
 
 ### 🔗 Live Project
-* **Live Website:** [Link to Deployed Website] (Update this link after deployment)
+* **Live Website:** [Link to Deployed Website] 
 * **Demo Video:** [Link to Demo Video]
 
 ---
